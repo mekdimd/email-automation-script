@@ -2,16 +2,15 @@ import os
 import random
 import smtplib
 import ssl
-import time
+from time import sleep, strftime, time, localtime
 from email.message import EmailMessage
-from time import sleep, strftime, localtime
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Get email info
-DISPLAY_NAME = os.environ.get('DISPLAY_NAME')  # Optional Display name
+DISPLAY_NAME = os.environ.get("DISPLAY_NAME")  # Optional Display name
 FROM_EMAIL = os.environ.get("EMAIL")  # Your email
 PASSWORD = os.environ.get("EMAIL_PASSWORD")  # Your (app) password
 TO_EMAIL = os.environ.get("TO_EMAIL")  # Recipient email
@@ -76,11 +75,12 @@ def send_email(to, subject, body):
         smtp.quit()
 
 
-def run_send_emails():
+# Send email script within time range(min_delay - max_delay) in minutes
+def run_send_emails(min_delay, max_delay):
     global EMAIL_BODY_LIST, EMAIL_SUBJECT_LIST
+    
     try:
         email_count = 0
-
         while True:
             # Shuffle array (idx 1-end), and join items
             temp = EMAIL_BODY_LIST[1:]
@@ -91,20 +91,18 @@ def run_send_emails():
             send_email(TO_EMAIL, random.choice(EMAIL_SUBJECT_LIST), email_body)
 
             # Confirmation that email was sent
-            current_time = strftime("%I:%M:%S%p", localtime())
+            current_time = strftime("%I:%M:%S %p", localtime())
             email_count += 1
             print(f"Sent to {TO_EMAIL} at {current_time} ({email_count} total)")
 
             # Sleep for a random interval between a specified range
-            lower_bound_min = 30
-            upper_bound_min = 90
-            sleep_time = random.uniform(lower_bound_min * 60, upper_bound_min * 60)
+            sleep_time = random.uniform(min_delay * 60, max_delay * 60)
 
-            print(f"Next email will be sent at {strftime('%I:%M:%S %p', localtime(time.time() + sleep_time))}\n")
+            print(f"Next email will be sent at {strftime('%I:%M:%S %p', localtime(time() + sleep_time))}\n")
             sleep(sleep_time)
 
     except KeyboardInterrupt:
         print("Email script terminated.")
 
 
-run_send_emails()
+run_send_emails(30, 90) 
