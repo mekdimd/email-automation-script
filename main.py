@@ -10,32 +10,13 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-
-def send_email(to, subject, body):
-    global DISPLAY_NAME, FROM_EMAIL, PASSWORD
-
-    em = EmailMessage()
-    em['From'] = f'{DISPLAY_NAME} <{FROM_EMAIL}>'
-    em['To'] = to
-    em['Subject'] = subject
-    em.set_content(body)
-
-    # Extra security
-    context = ssl.create_default_context()
-
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-        smtp.login(FROM_EMAIL, PASSWORD)
-        smtp.sendmail(FROM_EMAIL, to, em.as_string())
-        smtp.quit()
-
-
 # Get email info
-DISPLAY_NAME = os.environ.get('DISPLAY_NAME')
-FROM_EMAIL = os.environ.get("EMAIL")
-PASSWORD = os.environ.get("EMAIL_PASSWORD")
+DISPLAY_NAME = os.environ.get('DISPLAY_NAME')  # Optional Display name
+FROM_EMAIL = os.environ.get("EMAIL")  # Your email
+PASSWORD = os.environ.get("EMAIL_PASSWORD")  # Your (app) password
+TO_EMAIL = os.environ.get("TO_EMAIL")  # Recipient email
 
-# Replace values with email information
-TO_EMAIL = os.environ.get("TO_EMAIL")
+# Modify email subjects
 email_subject_list = [
     'Simplii Debit Mastercard Holiday Sweepstakes entry',
     'Simplii Debit Mastercard Holiday Sweepstakes Entry',
@@ -75,6 +56,24 @@ email_body_list = [
     f'First 6 digits of Simplii Debit Mastercard: {os.environ.get("DIGITS")}',
     f'Email address: {os.environ.get("EMAIL_BODY")}',
 ]
+
+
+def send_email(to, subject, body):
+    global DISPLAY_NAME, FROM_EMAIL, PASSWORD
+
+    em = EmailMessage()
+    em['From'] = f'{DISPLAY_NAME} <{FROM_EMAIL}>'
+    em['To'] = to
+    em['Subject'] = subject
+    em.set_content(body)
+
+    # Extra security
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+        smtp.login(FROM_EMAIL, PASSWORD)
+        smtp.sendmail(FROM_EMAIL, to, em.as_string())
+        smtp.quit()
 
 
 def run_send_emails():
