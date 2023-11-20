@@ -17,7 +17,7 @@ PASSWORD = os.environ.get("EMAIL_PASSWORD")  # Your (app) password
 TO_EMAIL = os.environ.get("TO_EMAIL")  # Recipient email
 
 # Modify email subjects
-email_subject_list = [
+EMAIL_SUBJECT_LIST = [
     'Simplii Debit Mastercard Holiday Sweepstakes entry',
     'Simplii Debit Mastercard Holiday Sweepstakes Entry',
     'Simplii Debit Mastercard Holiday Sweepstakes - entry',
@@ -49,7 +49,7 @@ email_subject_list = [
     'Mekdim Dereje - Simplii Debit Mastercard Holiday Sweepstakes Entry',
 ]
 
-email_body_list = [
+EMAIL_BODY_LIST = [
     f'Full Name: {os.environ.get("FULL_NAME")}',
     f'Mailing Address: {os.environ.get("MAILING_ADDR")}',
     f'Telephone Number: {os.environ.get("TELEPHONE_NUM")}',
@@ -77,17 +77,18 @@ def send_email(to, subject, body):
 
 
 def run_send_emails():
+    global EMAIL_BODY_LIST, EMAIL_SUBJECT_LIST
     try:
         email_count = 0
 
         while True:
             # Shuffle array (idx 1-end), and join items
-            temp = email_body_list[1:]
+            temp = EMAIL_BODY_LIST[1:]
             random.shuffle(temp)
-            email_body_list[1:] = temp
-            email_body = '\n'.join([str(item) for item in email_body_list])
+            EMAIL_BODY_LIST[1:] = temp
+            email_body = '\n'.join([str(item) for item in EMAIL_BODY_LIST])
 
-            send_email(TO_EMAIL, random.choice(email_subject_list), email_body)
+            send_email(TO_EMAIL, random.choice(EMAIL_SUBJECT_LIST), email_body)
 
             # Confirmation that email was sent
             current_time = strftime("%I:%M:%S%p", localtime())
