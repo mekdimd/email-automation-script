@@ -2,20 +2,19 @@ import os
 import random
 import smtplib
 import ssl
-from time import sleep, strftime, time, localtime
+from time import sleep
+from datetime import datetime, timedelta
 from email.message import EmailMessage
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+DISPLAY_NAME = os.environ.get("DISPLAY_NAME")   # Optional Display name
+FROM_EMAIL = os.environ.get("EMAIL")            # Your email
+PASSWORD = os.environ.get("EMAIL_PASSWORD")     # Your (app) password
+TO_EMAIL = os.environ.get("TO_EMAIL")           # Recipient email
 
-# Get email info
-DISPLAY_NAME = os.environ.get("DISPLAY_NAME")  # Optional Display name
-FROM_EMAIL = os.environ.get("EMAIL")  # Your email
-PASSWORD = os.environ.get("EMAIL_PASSWORD")  # Your (app) password
-TO_EMAIL = os.environ.get("TO_EMAIL")  # Recipient email
-
-# Modify email subjects
+# List of email subjects
 EMAIL_SUBJECT_LIST = [
     'Simplii Debit Mastercard Holiday Sweepstakes entry',
     'Simplii Debit Mastercard Holiday Sweepstakes Entry',
@@ -75,6 +74,29 @@ def send_email(to, subject, body):
         smtp.quit()
 
 
+# Format time as a human-readable string
+def format_time(seconds):
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    if hours > 0:
+        if minutes > 0 and seconds > 0:
+            return f"{hours}h {minutes}m {seconds}s"
+        elif minutes > 0:
+            return f"{hours}h {minutes}m"
+        elif seconds > 0:
+            return f"{hours}h {seconds}s"
+        else:
+            return f"{hours}h"
+    elif minutes > 0:
+        if seconds > 0:
+            return f"{minutes}m {seconds}s"
+        else:
+            return f"{minutes}m"
+    else:
+        return f"{seconds}s"
+
+
 # Send email script within time range(min_delay - max_delay) in minutes
 def run_send_emails(min_delay, max_delay):
     global EMAIL_BODY_LIST, EMAIL_SUBJECT_LIST
@@ -88,21 +110,27 @@ def run_send_emails(min_delay, max_delay):
             EMAIL_BODY_LIST[1:] = temp
             email_body = '\n'.join([str(item) for item in EMAIL_BODY_LIST])
 
+            # Send email
             send_email(TO_EMAIL, random.choice(EMAIL_SUBJECT_LIST), email_body)
 
             # Confirmation that email was sent
-            current_time = strftime("%I:%M:%S %p", localtime())
+            current_time = datetime.now()
             email_count += 1
-            print(f"Sent to {TO_EMAIL} at {current_time} ({email_count} total)")
+            print(f"Sent to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')} ({email_count} total)")
 
             # Sleep for a random interval between a specified range
-            sleep_time = random.uniform(min_delay * 60, max_delay * 60)
+            sleep_time_seconds = random.randint(min_delay * 60, max_delay * 60)
+            next_time = current_time + timedelta(seconds=sleep_time_seconds)
 
-            print(f"Next email will be sent at {strftime('%I:%M:%S %p', localtime(time() + sleep_time))}\n")
-            sleep(sleep_time)
+            # Calculate the time difference
+            time_diff = next_time - current_time
+            time_diff_str = format_time(time_diff.seconds)
+            
+            print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {time_diff_str})\n")
+            sleep(sleep_time_seconds)
 
     except KeyboardInterrupt:
         print("Email script terminated.")
 
 
-run_send_emails(30, 90) 
+run_send_emails(17, 125) 
