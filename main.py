@@ -97,12 +97,14 @@ def format_time(seconds):
         return f"{seconds}s"
 
 
-# Send emails with a delay in the range [min_delay, max_delay]
+# Send emails with a delay in the range [min_delay, max_delay] (minutes)
 def spaced_interval_algo(min_delay, max_delay):
     global EMAIL_BODY_LIST, EMAIL_SUBJECT_LIST
     
     try:
         email_count = 0
+        email_subject, prev_subject = ""
+
         while True:
             # Shuffle array (idx 1-end), and join items
             temp = EMAIL_BODY_LIST[1:]
@@ -110,15 +112,22 @@ def spaced_interval_algo(min_delay, max_delay):
             EMAIL_BODY_LIST[1:] = temp
             email_body = '\n'.join([str(item) for item in EMAIL_BODY_LIST])
 
+            # Ensures unique subject is sent with every email
+            while True:
+                email_subject = random.choice(EMAIL_SUBJECT_LIST)
+                if (email_subject != prev_subject):
+                    prev_subject = email_subject
+                    break
+
             # Send email
-            send_email(TO_EMAIL, random.choice(EMAIL_SUBJECT_LIST), email_body)
+            send_email(TO_EMAIL, email_subject, email_body)
 
             # Confirmation that email was sent
             current_time = datetime.now()
             email_count += 1
             print(f"Sent to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')} ({email_count} total)")
 
-            # Sleep for a random interval between a specified range
+            # Sleep for a random interval between a specified range (in seconds)
             sleep_time_sec = random.randint(min_delay * 60, max_delay * 60)
             next_time = current_time + timedelta(seconds=sleep_time_sec)
 
