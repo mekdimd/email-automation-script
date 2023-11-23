@@ -103,7 +103,7 @@ def spaced_interval_algo(min_delay, max_delay):
     
     try:
         email_count = 0
-        email_subject, prev_subject = ""
+        email_subject = prev_subject = ""
 
         while True:
             # Shuffle array (idx 1-end), and join items
@@ -112,7 +112,7 @@ def spaced_interval_algo(min_delay, max_delay):
             EMAIL_BODY_LIST[1:] = temp
             email_body = '\n'.join([str(item) for item in EMAIL_BODY_LIST])
 
-            # Ensures unique subject is sent with every email
+            # Ensures unique subject is sent with consecutive emails
             while True:
                 email_subject = random.choice(EMAIL_SUBJECT_LIST)
                 if (email_subject != prev_subject):
