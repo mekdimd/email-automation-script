@@ -97,8 +97,8 @@ def format_time(seconds):
         return f"{seconds}s"
 
 
-# Send email script within time range(min_delay - max_delay) in minutes
-def run_send_emails(min_delay, max_delay):
+# Send emails with a delay in the range [min_delay, max_delay]
+def spaced_interval_algo(min_delay, max_delay):
     global EMAIL_BODY_LIST, EMAIL_SUBJECT_LIST
     
     try:
@@ -119,18 +119,23 @@ def run_send_emails(min_delay, max_delay):
             print(f"Sent to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')} ({email_count} total)")
 
             # Sleep for a random interval between a specified range
-            sleep_time_seconds = random.randint(min_delay * 60, max_delay * 60)
-            next_time = current_time + timedelta(seconds=sleep_time_seconds)
+            sleep_time_sec = random.randint(min_delay * 60, max_delay * 60)
+            next_time = current_time + timedelta(seconds=sleep_time_sec)
 
             # Calculate the time difference
             time_diff = next_time - current_time
             time_diff_str = format_time(time_diff.seconds)
             
             print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {time_diff_str})\n")
-            sleep(sleep_time_seconds)
+            sleep(sleep_time_sec)
 
     except KeyboardInterrupt:
         print("Email script terminated.")
 
 
-run_send_emails(17, 125) 
+# Send emails in short bursts (1-5 min apart) and take a longer break in range [break_min, break_max]
+def burst_email_algo(num_emails_in_burst, break_min, break_max):
+    pass
+
+
+spaced_interval_algo(17, 127) 
