@@ -76,6 +76,7 @@ def send_email(to, subject, body):
 
 # Format time as a human-readable string
 def format_time(seconds):
+    seconds = int(seconds)
     hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
 
@@ -97,32 +98,32 @@ def format_time(seconds):
         return f"{seconds}s"
 
 
+# Prepare email contents (shuffling, randomizing, etc. happens here)
+def fetch_email_data():
+    global EMAIL_SUBJECT_LIST, EMAIL_BODY_LIST
+
+    email_subject = random.choice(EMAIL_SUBJECT_LIST)
+
+    # Shuffle array (idx 1-end), and join items
+    temp = EMAIL_BODY_LIST[1:]
+    random.shuffle(temp)
+    EMAIL_BODY_LIST[1:] = temp
+    email_body = '\n'.join([str(item) for item in EMAIL_BODY_LIST])
+
+    return email_subject, email_body
+
+
 # Send emails with a delay in the range [min_delay, max_delay] (minutes)
 def spaced_interval_algo(min_delay, max_delay):
-    global EMAIL_BODY_LIST, EMAIL_SUBJECT_LIST
-    
+    global TO_EMAIL
+
+    email_count = 0    
     try:
-        email_count = 0
-        email_subject, prev_subject = ""
-
         while True:
-            # Shuffle array (idx 1-end), and join items
-            temp = EMAIL_BODY_LIST[1:]
-            random.shuffle(temp)
-            EMAIL_BODY_LIST[1:] = temp
-            email_body = '\n'.join([str(item) for item in EMAIL_BODY_LIST])
-
-            # Ensures unique subject is sent with every email
-            while True:
-                email_subject = random.choice(EMAIL_SUBJECT_LIST)
-                if (email_subject != prev_subject):
-                    prev_subject = email_subject
-                    break
+            email_subject, email_body = fetch_email_data()
 
             # Send email
             send_email(TO_EMAIL, email_subject, email_body)
-
-            # Confirmation that email was sent
             current_time = datetime.now()
             email_count += 1
             print(f"Sent to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')} ({email_count} total)")
@@ -133,7 +134,7 @@ def spaced_interval_algo(min_delay, max_delay):
 
             # Calculate the time difference
             time_diff = next_time - current_time
-            time_diff_str = format_time(time_diff.seconds)
+            time_diff_str = format_time(time_diff.total_seconds())
             
             print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {time_diff_str})\n")
             sleep(sleep_time_sec)
