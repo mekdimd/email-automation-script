@@ -113,8 +113,57 @@ def fetch_email_data():
     return email_subject, email_body
 
 
+# Print confirmation that email was sent
+def print_email_info(recipient_email, email_count, current_time, next_time):
+    time_diff = next_time - current_time
+    print(f"Sent #{email_count} to {recipient_email} at {current_time.strftime('%I:%M:%S %p')}")
+    print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {format_time(time_diff.total_seconds())})")
+
+
+# Returns whether a given datetime object is in range (int) [offline_start, offline_end]
+def is_within_offline_hours(current_time, offline_start, offline_end):
+    offline_start_sec = offline_start * 3600
+    offline_end_sec = offline_end * 3600
+    time_sec = current_time.hour * 3600 + current_time.minute * 60 + current_time.second
+
+    return (
+            (offline_start < offline_end and (offline_start_sec <= time_sec < offline_end_sec)) or
+            (offline_start > offline_end and (time_sec >= offline_start_sec or time_sec <= offline_end_sec)) or
+            (offline_start == offline_end)  # Offline hours span full day i.e. always offline
+    )
+
+
+# TODO HANDLE DECIMAL OFFLINE_START AND OFFLINE_END
+# Returns the next email time to send for
+def calculate_next_time(current_time, break_sec, offline_start, offline_end):
+    next_time = current_time + timedelta(seconds=break_sec)
+    break_time = next_time - current_time
+
+    if is_within_offline_hours(next_time, offline_start, offline_end):
+        print(f"> OFFLINE HOURS: {datetime(2023, 11, 24, offline_start, 0, 0).strftime('%I:%M:%S %p')} - {datetime(2023, 11, 24, offline_end, 0, 0).strftime('%I:%M:%S %p')}")
+        print(f"> Current Time: {current_time.strftime('%I:%M:%S %p')}")
+        print(f"> Next Time: {next_time.strftime('%I:%M:%S %p')}")
+        print(f"> break_time = {format_time(break_time.total_seconds())}\n")
+
+        offline_end_sec = offline_end * 3600
+        next_time_sec = next_time.hour * 3600 + next_time.minute * 60 + next_time.second
+       
+        # Handle case when offline hours go past midnight goes into the next day
+        # Add 24h if the difference is negative (overflow into the next day)
+        sec_till_offline_end = offline_end_sec - next_time_sec
+        if sec_till_offline_end < 0:
+            sec_till_offline_end += 24 * 3600
+
+        # Update break time (and as a result, next_time)
+        break_time += timedelta(seconds=sec_till_offline_end)
+        print(f"> {next_time.strftime('%I:%M:%S %p')} is OFFLINE! Add {format_time(sec_till_offline_end)} break, total {format_time(break_time.total_seconds())}")
+        next_time += break_time
+
+    return next_time
+
+
 # Send emails with a delay in the range [min_delay, max_delay] (minutes)
-def spaced_interval_algo(min_delay, max_delay):
+def spaced_interval_algo(min_delay, max_delay, offline_start, offline_end):
     global TO_EMAIL
 
     email_count = 0    
@@ -126,26 +175,22 @@ def spaced_interval_algo(min_delay, max_delay):
             send_email(TO_EMAIL, email_subject, email_body)
             current_time = datetime.now()
             email_count += 1
-            print(f"Sent to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')} ({email_count} total)")
-
-            # Sleep for a random interval between a specified range (in seconds)
-            sleep_time_sec = random.randint(min_delay * 60, max_delay * 60)
-            next_time = current_time + timedelta(seconds=sleep_time_sec)
-
-            # Calculate the time difference
-            time_diff = next_time - current_time
-            time_diff_str = format_time(time_diff.total_seconds())
             
-            print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {time_diff_str})\n")
-            sleep(sleep_time_sec)
+            # Deternmine sleep time for next email
+            rand_break = random.randint(min_delay * 60, max_delay * 60)
+            next_time = calculate_next_time(current_time, rand_break, offline_start, offline_end)
+
+            # Confirmation that email was sent
+            print_email_info(TO_EMAIL, email_count, current_time, next_time)
+            
+            # Sleep until next email
+            sleep_sec = (next_time - current_time).total_seconds()
+            sleep(sleep_sec)
 
     except KeyboardInterrupt:
         print("Email script terminated.")
 
 
-# Send emails in short bursts (1-5 min apart) and take a longer break in range [break_min, break_max]
-def burst_email_algo(num_emails_in_burst, break_min, break_max):
-    pass
+offline_start, offline_end = [13, 17]
 
-
-spaced_interval_algo(17, 127) 
+spaced_interval_algo(17, 127, offline_start, offline_end)
