@@ -3,7 +3,7 @@ import random
 import smtplib
 import ssl
 from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from email.message import EmailMessage
 from dotenv import load_dotenv
 
@@ -140,7 +140,7 @@ def calculate_next_time(current_time, break_sec, offline_start, offline_end):
     break_time = next_time - current_time
 
     if is_within_offline_hours(next_time, offline_start, offline_end):
-        print(f"> OFFLINE HOURS: {datetime(2023, 11, 24, offline_start, 0, 0).strftime('%I:%M:%S %p')} - {datetime(2023, 11, 24, offline_end, 0, 0).strftime('%I:%M:%S %p')}")
+        print(f"> OFFLINE HOURS: {time(offline_start, 0, 0).strftime('%I:%M:%S %p')} - {time(offline_end, 0, 0).strftime('%I:%M:%S %p')}")
         print(f"> Current Time: {current_time.strftime('%I:%M:%S %p')}")
         print(f"> Next Time: {next_time.strftime('%I:%M:%S %p')}")
         print(f"> break_time = {format_time(break_time.total_seconds())}\n")
@@ -156,7 +156,9 @@ def calculate_next_time(current_time, break_sec, offline_start, offline_end):
 
         # Update break time (and as a result, next_time)
         break_time += timedelta(seconds=sec_till_offline_end)
-        print(f"> {next_time.strftime('%I:%M:%S %p')} is OFFLINE! Add {format_time(sec_till_offline_end)} break, total {format_time(break_time.total_seconds())}")
+        print(f"> {next_time.strftime('%I:%M:%S %p')} is OFFLINE!")
+        print(f"> Add {format_time(sec_till_offline_end)} to get to {time(offline_end, 0, 0).strftime('%I:%M %p')}, total = {format_time(break_time.total_seconds())}")
+        print(f"> Add initial break {format_time((next_time - current_time).total_seconds())} = {format_time((next_time + break_time - current_time).total_seconds())}")
         next_time += break_time
 
     return next_time
@@ -168,29 +170,28 @@ def spaced_interval_algo(min_delay, max_delay, offline_start, offline_end):
 
     email_count = 0    
     try:
-        while True:
-            email_subject, email_body = fetch_email_data()
-
-            # Send email
-            send_email(TO_EMAIL, email_subject, email_body)
+        while True:            
+            # Determine sleep time for next email
             current_time = datetime.now()
-            email_count += 1
-            
-            # Deternmine sleep time for next email
             rand_break = random.randint(min_delay * 60, max_delay * 60)
             next_time = calculate_next_time(current_time, rand_break, offline_start, offline_end)
 
-            # Confirmation that email was sent
-            print_email_info(TO_EMAIL, email_count, current_time, next_time)
-            
+            if not is_within_offline_hours(current_time + timedelta(seconds=rand_break), offline_start, offline_end):
+                # Send email
+                email_subject, email_body = fetch_email_data()
+                # send_email(TO_EMAIL, email_subject, email_body)
+                email_count += 1
+                print(f"Sent #{email_count} to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')}")
+
             # Sleep until next email
             sleep_sec = (next_time - current_time).total_seconds()
+            print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {format_time(sleep_sec)})\n")
             sleep(sleep_sec)
 
     except KeyboardInterrupt:
         print("Email script terminated.")
 
 
-offline_start, offline_end = [13, 17]
+offline_start, offline_end = [0, 6]
 
 spaced_interval_algo(17, 127, offline_start, offline_end)
