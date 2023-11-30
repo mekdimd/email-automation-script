@@ -113,8 +113,8 @@ def fetch_email_data():
     return email_subject, email_body
 
 
-# Print confirmation that email was sent
-def print_email_info(recipient_email, email_count, current_time, next_time):
+# # Print confirmation that email was sent
+# def print_email_info(recipient_email, email_count, current_time, next_time):
     time_diff = next_time - current_time
     print(f"Sent #{email_count} to {recipient_email} at {current_time.strftime('%I:%M:%S %p')}")
     print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {format_time(time_diff.total_seconds())})")
@@ -172,14 +172,14 @@ def spaced_interval_algo(min_delay, max_delay, offline_start, offline_end):
     try:
         while True:            
             # Determine sleep time for next email
-            current_time = datetime.now()
             rand_break = random.randint(min_delay * 60, max_delay * 60)
+            current_time = datetime.now()
             next_time = calculate_next_time(current_time, rand_break, offline_start, offline_end)
 
             if not is_within_offline_hours(current_time + timedelta(seconds=rand_break), offline_start, offline_end):
                 # Send email
                 email_subject, email_body = fetch_email_data()
-                # send_email(TO_EMAIL, email_subject, email_body)
+                send_email(TO_EMAIL, email_subject, email_body)
                 email_count += 1
                 print(f"Sent #{email_count} to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')}")
 
@@ -192,6 +192,68 @@ def spaced_interval_algo(min_delay, max_delay, offline_start, offline_end):
         print("Email script terminated.")
 
 
-offline_start, offline_end = [0, 6]
+# Send emails in short bursts (1-5 min apart) and take a longer break in range [break_min, break_max]
+def burst_email_algo(num_burst_min, num_burst_max, long_break_min, long_break_max):
+    MIN_BURST_FREQ, MAX_BURST_FREQ = [59, 123]
+    OFFLINE_START, OFFLINE_END = [0, 6]
+    # OFFLINE_START, OFFLINE_END = [10, 3]
+    email_count = 0
 
-spaced_interval_algo(17, 127, offline_start, offline_end)
+    if OFFLINE_START == OFFLINE_END:
+        raise Exception(f"Offline start hour can not have same start and end hour [{OFFLINE_START},{OFFLINE_END}]")
+
+    try:
+        while True:
+            num_burst_emails = random.randint(num_burst_min, num_burst_max)
+            print(f"BURST ALGORITHM\n\nSending {num_burst_emails} emails in burst...\n")
+
+            for i in range(num_burst_emails):
+                # Calculate break time
+                burst_break_sec = random.randint(MIN_BURST_FREQ, MAX_BURST_FREQ)
+                current_time = datetime.now()
+                next_time = current_time + timedelta(seconds=burst_break_sec)
+
+                # Sending burst during offline hours, sleep until hours are finished
+                if is_within_offline_hours(next_time, OFFLINE_START, OFFLINE_END):
+                    burst_resume_time = calculate_next_time(current_time, burst_break_sec, OFFLINE_START, OFFLINE_END)
+                    pause_time = (burst_resume_time - current_time).total_seconds()
+                    print(f"Scheduled to continue at {burst_resume_time.strftime('%I:%M:%S %p')} (in {format_time(pause_time)})\n")
+                    print(f"\tsleeping for {format_time(pause_time)}")
+                    sleep(pause_time)
+
+                # Send burst email
+                email_subject, email_body = fetch_email_data()
+                send_email(TO_EMAIL, email_subject, email_body)
+                email_count += 1
+                
+                # Update times
+                current_time = datetime.now()
+                next_time = current_time + timedelta(seconds=burst_break_sec)                
+
+                # Print info
+                print(f"Sent #{email_count} to {TO_EMAIL} at {current_time.strftime('%I:%M:%S %p')}")
+                print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} (in {format_time(burst_break_sec)})")
+                print(f"{i+1}/{num_burst_emails} burst emails sent\n")
+                # print(f"\tsleeping for {format_time(burst_break_sec)}")
+                sleep(burst_break_sec)
+
+            # Take a longer break
+            rand_break = random.randint(long_break_min * 60, long_break_max * 60)
+            current_time = datetime.now()
+            next_time = calculate_next_time(current_time, rand_break, OFFLINE_START, OFFLINE_END)
+            long_break_sec = (next_time - current_time).total_seconds()
+
+            # Print details for next email
+            print(f"Long break. Next burst at {next_time.strftime('%I:%M:%S %p')} (in {format_time(long_break_sec)})\n")
+            # print(f"\tsleeping for {format_time(long_break_sec)}")
+            sleep(long_break_sec)
+    except KeyboardInterrupt:
+        print("Email script terminated.")
+
+
+offline_start, offline_end = [0, 6]
+min_burst, max_burst = [19, 26]
+break_min, break_max = [180, 360]
+
+# spaced_interval_algo(17, 127, offline_start, offline_end)
+burst_email_algo(min_burst, max_burst, break_min, break_max)
