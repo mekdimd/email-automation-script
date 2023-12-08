@@ -253,7 +253,7 @@ def burst_email_algo(num_burst_min, num_burst_max, long_break_min, long_break_ma
 
 offline_start, offline_end = [0, 6]
 min_burst, max_burst = [19, 26]
-break_min, break_max = [180, 360]
+break_min, break_max = [60*3, 60*8]
 
 # spaced_interval_algo(17, 127, offline_start, offline_end)
 burst_email_algo(min_burst, max_burst, break_min, break_max)
