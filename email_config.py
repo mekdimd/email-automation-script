@@ -19,30 +19,79 @@ class EmailConfig:
 
         with open(json_path, 'r') as file:
             data = json.load(file)
-            self.to_email = data["to_email"]
 
-            # Email subject
-            self.email_subject_list = data["email_subject"]["list"]
+            # Validate and set to_email
+            self.to_email = data.get("to_email", "")
+            if not self.to_email:
+                raise ValueError("Invalid or missing 'to_email' in the configuration.")
 
-            # Email body
-            self.email_body_list = data["email_body"]["list"]
-            self.email_body_shuffle = data["email_body"]["shuffle"]
-            self.email_body_shuffle_first = data["email_body"]["shuffle_first_item"]
+            # Validate and set email_subject_list
+            self.email_subject_list = data.get("email_subject", {}).get("list", [])
+            if not self.email_subject_list or not all(isinstance(subj, str) for subj in self.email_subject_list):
+                raise ValueError("Invalid or missing 'email_subject.list' in the configuration.")
 
-            # Time related
-            self.offline_hr_start = data["offline_hours"][0]
-            self.offline_hr_end = data["offline_hours"][1]
-            self.email_break_minutes_min = data["email_break_minutes"][0]
-            self.email_break_minutes_max = data["email_break_minutes"][1]
+            # Validate and set email_body_list, email_body_shuffle, and email_body_shuffle_first
+            email_body = data.get("email_body", {})
+            self.email_body_list = email_body.get("list", [])
+            if not self.email_body_list or not all(isinstance(line, str) for line in self.email_body_list):
+                raise ValueError("Invalid or missing 'email_body.list' in the configuration.")
+            self.email_body_shuffle = bool(email_body.get("shuffle", False))
+            self.email_body_shuffle_first = bool(email_body.get("shuffle_first_item", False))
 
-            # Burst Algorithm
-            self.using_burst_algo = data["burst"]["using_burst_algo"]
-            self.burst_min_freq_sec = data["burst"]["burst_frequency_sec"][0]
-            self.burst_max_freq_sec = data["burst"]["burst_frequency_sec"][1]
-            self.burst_num_emails_min = data["burst"]["num_emails"][0]
-            self.burst_num_emails_max = data["burst"]["num_emails"][1]
-            self.burst_long_break_minutes_min = data["burst"]["long_break_minutes"][0]
-            self.burst_long_break_minutes_max = data["burst"]["long_break_minutes"][1]
+            # Validate and set offline_hr_start and offline_hr_end
+            offline_hours = data.get("offline_hours", [])
+            if len(offline_hours) != 2 or not all(isinstance(hr, int) for hr in offline_hours):
+                raise ValueError("Invalid or missing 'offline_hours' in the configuration.")
+            self.offline_hr_start, self.offline_hr_end = offline_hours
+            if not (0 <= self.offline_hr_start <= 23 and 0 <= self.offline_hr_end <= 23):
+                raise ValueError("Invalid values for 'offline_hours'. Hours should be in the range [0, 23].")
+            if self.offline_hr_start == self.offline_hr_end:
+                raise ValueError("'offline_hours' should have different start and end times.")
+
+            # Validate and set email_break_minutes_min and email_break_minutes_max
+            email_break_minutes = data.get("email_break_minutes", [])
+            if len(email_break_minutes) != 2 or not all(isinstance(minutes, int) for minutes in email_break_minutes):
+                raise ValueError("Invalid or missing 'email_break_minutes' in the configuration.")
+            self.email_break_minutes_min, self.email_break_minutes_max = email_break_minutes
+            if not (0 <= self.email_break_minutes_min <= self.email_break_minutes_max):
+                raise ValueError("Invalid values for 'email_break_minutes'. Minutes should be non-negative.")
+
+            # Validate and set Burst Algorithm parameters
+            burst_data = data.get("burst", {})
+            self.using_burst_algo = bool(burst_data.get("using_burst_algo", False))
+
+            # Validate and set burst_min_freq_sec and burst_max_freq_sec
+            burst_frequency_sec = burst_data.get("burst_frequency_sec", [])
+            if len(burst_frequency_sec) != 2 or not all(isinstance(sec, int) for sec in burst_frequency_sec):
+                raise ValueError("Invalid or missing 'burst.burst_frequency_sec' in the configuration.")
+            self.burst_min_freq_sec, self.burst_max_freq_sec = burst_frequency_sec
+            if not (0 <= self.burst_min_freq_sec <= self.burst_max_freq_sec):
+                raise ValueError("Invalid values for 'burst.burst_frequency_sec'. Seconds should be non-negative.")
+            if self.burst_min_freq_sec > self.burst_max_freq_sec:
+                raise ValueError("Invalid values for 'burst.burst_frequency_sec'. "
+                                 "Minimum frequency should be less than or equal to maximum frequency.")
+
+            # Validate and set burst_num_emails_min and burst_num_emails_max
+            burst_num_emails = burst_data.get("num_emails", [])
+            if len(burst_num_emails) != 2 or not all(isinstance(num, int) for num in burst_num_emails):
+                raise ValueError("Invalid or missing 'burst.num_emails' in the configuration.")
+            self.burst_num_emails_min, self.burst_num_emails_max = burst_num_emails
+            if self.burst_num_emails_min > self.burst_num_emails_max:
+                raise ValueError("Invalid values for 'burst.num_emails'. "
+                                 "Minimum number of emails should be less than or equal to maximum number.")
+
+            # Validate and set burst_long_break_minutes_min and burst_long_break_minutes_max
+            burst_long_break_minutes = burst_data.get("long_break_minutes", [])
+            if len(burst_long_break_minutes) != 2 or not all(
+                    isinstance(minutes, int) for minutes in burst_long_break_minutes
+            ):
+                raise ValueError("Invalid or missing 'burst.long_break_minutes' in the configuration.")
+            self.burst_long_break_minutes_min, self.burst_long_break_minutes_max = burst_long_break_minutes
+            if not (0 <= self.burst_long_break_minutes_min <= self.burst_long_break_minutes_max):
+                raise ValueError("Invalid values for 'burst.long_break_minutes'. Minutes should be non-negative.")
+            if self.burst_long_break_minutes_min > self.burst_long_break_minutes_max:
+                raise ValueError("Invalid values for 'burst.long_break_minutes'. "
+                                 "Minimum long break minutes should be less than or equal to maximum.")
 
     def is_using_burst_algo(self):
         return self.using_burst_algo
@@ -82,10 +131,6 @@ class EmailConfig:
             smtp.login(self.FROM_EMAIL, self.PASSWORD)
             smtp.sendmail(self.FROM_EMAIL, self.to_email, em.as_string())
             smtp.quit()
-
-    # TODO JSON FILE CHECKS
-    def validate_data(self):
-        pass
 
     def __str__(self):
         return (
