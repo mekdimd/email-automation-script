@@ -6,7 +6,14 @@ The Email Automation Script is a Python script that sends emails at random inter
 you want to simulate human-like email sending patterns. The current implementation is for a sweepstake contest.
 
 This script utilizes the `smtplib` library for sending emails and incorporates the `python-dotenv` package to manage
-environment variables.
+environment variables. **This script is not intended for malicious purposes, please use responsibly!**
+
+## Features
+
+- Supports 2 different email sending algorithms (Spaced interval and Burst)
+    - Spaced interval algorithm sends emails at random intervals
+    - Burst algorithm sends many emails in shorter bursts and then takes a longer break.
+- Avoid sending emails during offline hours (ex. 12am - 6am)
 
 ## Getting Started
 
