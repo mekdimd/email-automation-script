@@ -1,4 +1,3 @@
-# email_config.py
 import os
 import json
 import random
@@ -150,8 +149,3 @@ class EmailConfig:
             f"Burst Long Break Minutes Min: {self.burst_long_break_minutes_min}\n"
             f"Burst Long Break Minutes Max: {self.burst_long_break_minutes_max}\n"
         )
-
-
-config = "config.json"
-obj = EmailConfig(config)
-print(obj)
