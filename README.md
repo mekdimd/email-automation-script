@@ -68,21 +68,40 @@ environment variables.
 
 ## Configuration
 
-1. Create a `.env` file in the project root.
-2. Add the necessary environment variables. See the example below:
-
+1. Create a `.env` file in the project root and add the necessary environment variables. See the example below:
    ```sh
    # Login info
    DISPLAY_NAME='Bob Smith'
    EMAIL='bobsmith123@gmail.com'
    EMAIL_PASSWORD='abcdefghijklmnop'    # App Password
-
-   TO_EMAIL='alicesmith@gmail.com'
-
-   # Email Body
-   FULL_NAME='Bob Smith'
-   MAILING_ADDR='123 Main St, Vancouver, BC, V1V 1V1'
-   TELEPHONE_NUM='604-123-4567'
-   DIGITS='123456'
-   EMAIL_BODY='bobsmith123@gmail.com'
+   ```
+2. Edit the config.json file to configure the script. See the example below:
+   ```json
+    {
+      "to_email": "test@gmail.com",
+      "email_subject": {
+        "list": [
+          "Subject 1",
+          "Subject 2",
+          "Subject 3"
+        ]
+      },
+      "email_body": {
+        "list": [
+          "First Line",
+          "Second Line",
+          "Third Line"
+        ],
+        "shuffle": 1,
+        "shuffle_first_line": 0
+      },
+      "offline_hours": [0, 6],
+      "email_break_minutes": [60, 120],
+      "burst": {
+        "using_burst_algo": 1,
+        "burst_frequency_sec": [59, 123],
+        "num_emails": [19, 26],
+        "long_break_minutes": [180, 480]
+      }
+    }
    ```
