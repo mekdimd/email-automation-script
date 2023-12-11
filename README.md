@@ -93,7 +93,7 @@ environment variables.
           "Third Line"
         ],
         "shuffle": 1,
-        "shuffle_first_item": 0
+        "shuffle_first_line": 0
       },
       "offline_hours": [0, 6],
       "email_break_minutes": [60, 120],
