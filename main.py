@@ -139,7 +139,6 @@ def burst_email_algo(econfig: EmailConfig) -> None:
                     pause_time = (burst_resume_time - current_time).total_seconds()
                     print(f"Scheduled to continue at {burst_resume_time.strftime('%I:%M:%S %p')} "
                           f"(in {format_time(pause_time)})\n")
-                    print(f"\tsleeping for {format_time(pause_time)}")
                     sleep(pause_time)
 
                 # Send burst email
