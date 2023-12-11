@@ -36,7 +36,7 @@ class EmailConfig:
             if not self.email_body_list or not all(isinstance(line, str) for line in self.email_body_list):
                 raise ValueError("Invalid or missing 'email_body.list' in the configuration.")
             self.email_body_shuffle = bool(email_body.get("shuffle", False))
-            self.email_body_shuffle_first = bool(email_body.get("shuffle_first_item", False))
+            self.email_body_shuffle_first_item = bool(email_body.get("shuffle_first_line", False))
 
             # Validate and set offline_hr_start and offline_hr_end
             offline_hours = data.get("offline_hours", [])
@@ -107,7 +107,7 @@ class EmailConfig:
         # Shuffle array
         if self.email_body_shuffle:
             # Shuffle everything but the first item
-            if not self.email_body_shuffle_first:
+            if not self.email_body_shuffle_first_item:
                 temp = result_list[1:]
                 random.shuffle(temp)
                 result_list[1:] = temp
@@ -138,7 +138,7 @@ class EmailConfig:
             f"Email Subject List: {self.email_subject_list}\n"
             f"Email Body List: {self.email_body_list}\n"
             f"Email Body Shuffle: {self.email_body_shuffle}\n"
-            f"Email Body Shuffle First: {self.email_body_shuffle_first}\n"
+            f"Email Body Shuffle First: {self.email_body_shuffle_first_item}\n"
             f"Offline Hours: {self.offline_hr_start} - {self.offline_hr_end}\n"
             f"Email Break Minutes Min: {self.email_break_minutes_min}\n"
             f"Email Break Minutes Max: {self.email_break_minutes_max}\n"
