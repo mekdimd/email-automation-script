@@ -1,0 +1,42 @@
+{
+  "to_email": "test@gmail.com",
+  "email_subject": {
+    "list": [
+      "Subject 1",
+      "Subject 2",
+      "Subject 3"
+    ]
+  },
+  "email_body": {
+    "list": [
+      "First Line",
+      "Second Line",
+      "Third Line"
+    ],
+    "shuffle": 1,
+    "shuffle_first_item": 0
+  },
+  "offline_hours": [
+    0,
+    6
+  ],
+  "email_break_minutes": [
+    60,
+    120
+  ],
+  "burst": {
+    "using_burst_algo": 1,
+    "burst_frequency_sec": [
+      59,
+      123
+    ],
+    "num_emails": [
+      19,
+      26
+    ],
+    "long_break_minutes": [
+      180,
+      480
+    ]
+  }
+}
