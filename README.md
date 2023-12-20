@@ -3,17 +3,14 @@
 ## Description
 
 The Email Automation Script is a Python script that sends emails at random intervals. It is designed for scenarios where
-you want to simulate human-like email sending patterns. The current implementation is for a sweepstake contest.
-
-This script utilizes the `smtplib` library for sending emails and incorporates the `python-dotenv` package to manage
-environment variables. **This script is not intended for malicious purposes, please use responsibly!**
+you want to simulate human-like email sending patterns. This script utilizes the `smtplib` library for sending emails and incorporates the `python-dotenv` package to manage environment variables. **This script is not intended for malicious purposes, please use responsibly!**
 
 ## Features
 
-- Supports 2 different email sending algorithms (Spaced interval and Burst)
-    - Spaced interval algorithm sends emails at random intervals
-    - Burst algorithm sends many emails in shorter bursts and then takes a longer break.
-- Avoid sending emails during offline hours (ex. 12am - 6am)
+- Supports 2 different email-sending algorithms
+    - The "Spaced Interval algorithm" sends emails at random intervals (ex. send emails every 1-2 hours)
+    - The "Burst algorithm" sends many emails in shorter bursts and then takes a longer break; this algorithm is more human-like. (ex. send ~20 burst emails 1-2 mins apart, long break 6-8 hours)
+- Avoids sending emails during offline hours that can be specified in config.json (ex. 12am - 6am)
 
 ## Getting Started
 
@@ -106,9 +103,9 @@ environment variables. **This script is not intended for malicious purposes, ple
       "email_break_minutes": [60, 120],
       "burst": {
         "using_burst_algo": 1,
-        "burst_frequency_sec": [59, 123],
-        "num_emails": [19, 26],
-        "long_break_minutes": [180, 480]
+        "burst_frequency_sec": [60, 120],
+        "num_emails": [20, 25],
+        "long_break_minutes": [360, 480]
       }
     }
    ```
