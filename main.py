@@ -86,7 +86,6 @@ def calculate_next_time(current_time: datetime, break_sec: int, offline_start: i
 
 # Send emails with a delay in the range [min_delay, max_delay] (minutes)
 def spaced_interval_algo(econfig: EmailConfig) -> None:
-    email_count = 0
     try:
         while True:
             # Determine sleep time for next email
@@ -102,8 +101,7 @@ def spaced_interval_algo(econfig: EmailConfig) -> None:
                                            econfig.offline_hr_end):
                 # Send email
                 econfig.send_email()
-                email_count += 1
-                print(f"Sent #{email_count} to {econfig.to_email} at {current_time.strftime('%I:%M:%S %p')}")
+                print(f"Sent #{econfig.num_emails_sent} to {econfig.to_email} at {current_time.strftime('%I:%M:%S %p')}")
 
             # Sleep until next email
             sleep_sec = (next_time - current_time).total_seconds()
@@ -116,8 +114,6 @@ def spaced_interval_algo(econfig: EmailConfig) -> None:
 
 # Send emails in short bursts (1-5 min apart) and take a longer break in range [break_min, break_max]
 def burst_email_algo(econfig: EmailConfig) -> None:
-    email_count = 0
-
     try:
         while True:
             num_burst_emails = random.randint(econfig.burst_num_emails_min, econfig.burst_num_emails_max)
@@ -143,14 +139,13 @@ def burst_email_algo(econfig: EmailConfig) -> None:
 
                 # Send burst email
                 econfig.send_email()
-                email_count += 1
 
                 # Update times
                 current_time = datetime.now()
                 next_time = current_time + timedelta(seconds=burst_break_sec)
 
                 # Print info
-                print(f"Sent #{email_count} "
+                print(f"Sent #{econfig.num_emails_sent} "
                       f"to {econfig.to_email} "
                       f"at {current_time.strftime('%I:%M:%S %p')}")
                 print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} "

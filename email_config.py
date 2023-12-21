@@ -10,6 +10,8 @@ import ssl
 
 class EmailConfig:
     def __init__(self, json_path):
+        self.num_emails_sent = 0
+        
         # Load environment variables from .env file
         load_dotenv()
         self.DISPLAY_NAME = os.environ.get("DISPLAY_NAME")  # Optional Display name
@@ -129,6 +131,7 @@ class EmailConfig:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
             smtp.login(self.FROM_EMAIL, self.PASSWORD)
             smtp.sendmail(self.FROM_EMAIL, self.to_email, em.as_string())
+            self.num_emails_sent += 1   # Update email count
             smtp.quit()
 
     def __str__(self):
