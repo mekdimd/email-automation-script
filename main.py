@@ -32,8 +32,8 @@ def format_time(seconds) -> str:
 # Print confirmation that email was sent
 def print_email_info(recipient_email: str, email_count: int, current_time: datetime, next_time: datetime) -> None:
     time_diff = next_time - current_time
-    print(f"Sent #{email_count} to {recipient_email} at {current_time.strftime('%I:%M:%S %p')}")
-    print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} "
+    print(f"Sent #{email_count} to {recipient_email} at {current_time.strftime('%I:%M:%S %p')}\n"
+          f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} "
           f"(in {format_time(time_diff.total_seconds())})")
 
 
@@ -58,10 +58,10 @@ def calculate_next_time(current_time: datetime, break_sec: int, offline_start: i
     if is_within_offline_hours(next_time, offline_start, offline_end):
         print(f"> OFFLINE HOURS: "
               f"{time(offline_start, 0, 0).strftime('%I:%M:%S %p')} - "
-              f"{time(offline_end, 0, 0).strftime('%I:%M:%S %p')}")
-        print(f"> Current Time: {current_time.strftime('%I:%M:%S %p')}")
-        print(f"> Next Time: {next_time.strftime('%I:%M:%S %p')}")
-        print(f"> break_time = {format_time(break_time.total_seconds())}\n")
+              f"{time(offline_end, 0, 0).strftime('%I:%M:%S %p')}\n"
+              f"> Current Time: {current_time.strftime('%I:%M:%S %p')}\n"
+              f"> Next Time: {next_time.strftime('%I:%M:%S %p')}\n"
+              f"> break_time = {format_time(break_time.total_seconds())}\n")
 
         offline_end_sec = offline_end * 3600
         next_time_sec = next_time.hour * 3600 + next_time.minute * 60 + next_time.second
@@ -74,11 +74,11 @@ def calculate_next_time(current_time: datetime, break_sec: int, offline_start: i
 
         # Update break time (and as a result, next_time)
         break_time += timedelta(seconds=sec_till_offline_end)
-        print(f"> {next_time.strftime('%I:%M:%S %p')} is OFFLINE!")
-        print(f"> Add {format_time(sec_till_offline_end)} to get to {time(offline_end, 0, 0).strftime('%I:%M %p')}, "
-              f"total = {format_time(break_time.total_seconds())}")
-        print(f"> Add initial break {format_time((next_time - current_time).total_seconds())}"
-              f" = {format_time((next_time + break_time - current_time).total_seconds())}")
+        print(f"> {next_time.strftime('%I:%M:%S %p')} is OFFLINE!\n"
+              f"> Add {format_time(sec_till_offline_end)} to get to {time(offline_end, 0, 0).strftime('%I:%M %p')}, "
+              f"total = {format_time(break_time.total_seconds())}\n"
+              f"> Add initial break {format_time((next_time - current_time).total_seconds())}"
+              f" = {format_time((next_time + break_time - current_time).total_seconds())}\n")
         next_time += break_time
 
     return next_time
@@ -147,10 +147,10 @@ def burst_email_algo(econfig: EmailConfig) -> None:
                 # Print info
                 print(f"Sent #{econfig.num_emails_sent} "
                       f"to {econfig.to_email} "
-                      f"at {current_time.strftime('%I:%M:%S %p')}")
-                print(f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} "
-                      f"(in {format_time(burst_break_sec)})")
-                print(f"{i + 1}/{num_burst_emails} burst emails sent\n")
+                      f"at {current_time.strftime('%I:%M:%S %p')}\n"
+                      f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} "
+                      f"(in {format_time(burst_break_sec)})\n"
+                      f"{i + 1}/{num_burst_emails} burst emails sent\n")
                 sleep(burst_break_sec)
 
             # Take a longer break
