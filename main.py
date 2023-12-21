@@ -29,14 +29,6 @@ def format_time(seconds) -> str:
         return f"{seconds}s"
 
 
-# Print confirmation that email was sent
-def print_email_info(recipient_email: str, email_count: int, current_time: datetime, next_time: datetime) -> None:
-    time_diff = next_time - current_time
-    print(f"Sent #{email_count} to {recipient_email} at {current_time.strftime('%I:%M:%S %p')}\n"
-          f"Next email will be sent at {next_time.strftime('%I:%M:%S %p')} "
-          f"(in {format_time(time_diff.total_seconds())})")
-
-
 # Returns whether a given datetime object is in range (int) [offline_start, offline_end]
 def is_within_offline_hours(current_time: datetime, offline_start: int, offline_end: int):
     offline_start_sec = offline_start * 3600
